@@ -1,11 +1,19 @@
 import streamlit as st
-import joblib
+import pickle
 import pandas as pd
 
-# Load model
-model = joblib.load("laptop_price_model")
+# --------------------------------------------------
+# Load Model
+# --------------------------------------------------
 
-# Page configuration
+with open("laptop_price_model.pkl", "rb") as file:
+    model = pickle.load(file)
+
+
+# --------------------------------------------------
+# Page Configuration
+# --------------------------------------------------
+
 st.set_page_config(
     page_title="Laptop Price Predictor",
     page_icon="💻",
@@ -13,131 +21,91 @@ st.set_page_config(
 )
 
 st.title("💻 Laptop Price Predictor")
-st.write("Enter the laptop specifications below to predict its price.")
+st.write("Enter the laptop specifications to estimate its price.")
 
 st.divider()
 
-# -----------------------------
-# User Inputs
-# -----------------------------
 
-brand = st.selectbox(
-    "Brand",
-    [
-        "Acer",
-        "Apple",
-        "Asus",
-        "Dell",
-        "HP",
-        "Lenovo",
-        "MSI",
-        "Microsoft",
-        "Samsung",
-        "Other"
-    ]
+# --------------------------------------------------
+# Input Features
+# --------------------------------------------------
+
+brand = st.number_input(
+    "Brand Code",
+    min_value=0.0,
+    value=0.0,
+    help="Enter the numerical brand code used during model training."
 )
 
 spec_rating = st.number_input(
     "Specification Rating",
     min_value=0.0,
-    max_value=100.0,
     value=50.0
 )
 
 ram = st.number_input(
     "RAM",
-    min_value=1,
-    max_value=128,
-    value=8
+    min_value=1.0,
+    value=8.0
 )
 
-ram_type = st.selectbox(
-    "RAM Type",
-    [
-        "DDR3",
-        "DDR4",
-        "DDR5",
-        "LPDDR3",
-        "LPDDR4",
-        "LPDDR4X",
-        "LPDDR5",
-        "Other"
-    ]
+ram_type = st.number_input(
+    "RAM Type Code",
+    min_value=0.0,
+    value=0.0,
+    help="Enter the numerical RAM type code used during training."
 )
-
-brand_map = {
-    "Acer": 0,
-    "Apple": 1,
-    "Asus": 2
-}
 
 rom = st.number_input(
     "ROM / Storage",
-    min_value=1,
-    max_value=8192,
-    value=512
+    min_value=1.0,
+    value=512.0
 )
 
-rom_type = st.selectbox(
-    "ROM Type",
-    [
-        "SSD",
-        "HDD",
-        "eMMC",
-        "Hybrid",
-        "Other"
-    ]
+rom_type = st.number_input(
+    "ROM Type Code",
+    min_value=0.0,
+    value=0.0,
+    help="Enter the numerical ROM type code used during training."
 )
 
 display_size = st.number_input(
     "Display Size (inches)",
-    min_value=10.0,
-    max_value=20.0,
+    min_value=1.0,
     value=15.6
 )
 
 resolution_width = st.number_input(
     "Resolution Width",
-    min_value=640,
-    max_value=8000,
-    value=1920
+    min_value=1.0,
+    value=1920.0
 )
 
 resolution_height = st.number_input(
     "Resolution Height",
-    min_value=480,
-    max_value=5000,
-    value=1080
+    min_value=1.0,
+    value=1080.0
 )
 
-os = st.selectbox(
-    "Operating System",
-    [
-        "Windows",
-        "macOS",
-        "Linux",
-        "Chrome OS",
-        "DOS",
-        "Other"
-    ]
+os = st.number_input(
+    "OS Code",
+    min_value=0.0,
+    value=0.0,
+    help="Enter the numerical OS code used during training."
 )
 
 warranty = st.number_input(
-    "Warranty (years)",
-    min_value=0,
-    max_value=10,
-    value=1
+    "Warranty",
+    min_value=0.0,
+    value=1.0
 )
 
-# -----------------------------
+
+# --------------------------------------------------
 # Prediction
-# -----------------------------
+# --------------------------------------------------
 
 if st.button("🔮 Predict Laptop Price"):
-
-    # IMPORTANT:
-    # These columns must be in exactly the same
-    # order as the model's training features.
 
     input_data = pd.DataFrame({
         "brand": [brand],
@@ -154,6 +122,7 @@ if st.button("🔮 Predict Laptop Price"):
     })
 
     try:
+
         prediction = model.predict(input_data)
 
         st.success(
@@ -161,5 +130,6 @@ if st.button("🔮 Predict Laptop Price"):
         )
 
     except Exception as e:
+
         st.error("Prediction failed.")
         st.exception(e)
